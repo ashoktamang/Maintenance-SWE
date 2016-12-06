@@ -1,20 +1,19 @@
+C F
+D X
+D Y
 A B
 A C
+Q C
+Q D
 A D
 B X
 B Y
 B Z
-C F
-D X
-D Y
 D Z
 X P
-X R
 Y X
-Z B
+Z R
 Z F
-Q C
-Q D
 **
 F
-A
+Q
