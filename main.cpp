@@ -18,49 +18,46 @@
 
 using namespace std;
 
-unordered_map<char, vector<char> > get_module_tree(string file_name);
+unordered_map<string, vector<string> > get_module_tree(string file_name);
 
-void get_transaction_for_explosion(string file_name, char* defects);
+void get_transaction_for_explosion(string file_name, string* defective_module, string* transaction);
 
-vector<char> get_all_transactions(unordered_map<char, vector<char> > module_tree);
+vector<string> get_all_transactions(unordered_map<string, vector<string> > module_tree);
 
-bool is_transaction(char module_name, vector<char> transactions);
+bool is_transaction(string module_name, vector<string> transactions);
 
-vector<char> get_all_unique_modules(unordered_map<char, vector<char> > module_tree);
+vector<string> get_all_unique_modules(unordered_map<string, vector<string> > module_tree);
 
-void get_all_paths(char transaction, char defective, unordered_map<char, vector<char> > module_tree, vector<char> nodes);
+void get_all_paths(string transaction, string defective, unordered_map<string, vector<string> > module_tree, vector<string> nodes);
 
-void print_all_paths_until(char u, char d, unordered_map<char, bool> visited, char* path, int &path_index, unordered_map<char, vector<char> > module_tree);
+void print_all_paths_until(string u, string d, unordered_map<string, bool> visited, string* path, int &path_index, unordered_map<string, vector<string> > module_tree);
 
-void get_explosion(char transaction, unordered_map<char, vector<char> > module_tree, vector<char> nodes);
+void get_explosion(string transaction, unordered_map<string, vector<string> > module_tree, vector<string> nodes);
 
-void print_all_explosion(char transaction, unordered_map<char, bool> visited, char* path, int &path_index, unordered_map<char, vector<char> > module_tree);
+void print_all_explosion(string transaction, unordered_map<string, bool> visited, string* path, int &path_index, unordered_map<string, vector<string> > module_tree);
 
 int main(int argc, const char * argv[]) {
     
     // Hashmap, key<string> = name of the module, value <string[]> = its depended modules' name
-    std::unordered_map<char, std::vector<char> > modules1;
-    modules1 = get_module_tree("inp.txt");
-    for(std::unordered_map<char, std::vector<char> >::const_iterator iter = modules1.begin() ; iter != modules1.end() ; iter++)
+    unordered_map<string, vector<string> > modules1;
+    modules1 = get_module_tree("inp1.txt");
+    for(unordered_map<string, vector<string> >::const_iterator iter = modules1.begin() ; iter != modules1.end() ; iter++)
     {
-        std::cout << iter->first << ":";
-        for (std::vector<char>::const_iterator jter = iter->second.begin() ; jter != iter->second.end() ; jter++) {
-            std::cout << *jter << " ";
+        cout << iter->first << ":";
+        for (vector<string>::const_iterator jter = iter->second.begin() ; jter != iter->second.end() ; jter++) {
+            cout << *jter << " ";
         }
-        std::cout << std::endl;
+        cout << std::endl;
     }
-    char defects[2];
-    char transaction, defective;
-    transaction = defects[1];
-    defective = defects[0];
-    get_transaction_for_explosion("inp.txt", defects);
-    cout << "Defected Module: " << defects[0] << endl;
-    cout << "Transaction for the explosion: " << defects[1] << endl;
+    string transaction, defective;
+    get_transaction_for_explosion("inp1.txt", &defective, &transaction);
+    cout << "\nDefected Module: " << defective << endl;
+    cout << "Transaction for the explosion: " << transaction << endl;
     
-    cout << "Transactions: \n";
-    vector<char> transactions;
+    cout << "Transactions: ";
+    vector<string> transactions;
     transactions = get_all_transactions(modules1);
-    for (vector<char>::iterator it = transactions.begin() ; it != transactions.end(); ++it)
+    for (vector<string>::iterator it = transactions.begin() ; it != transactions.end(); ++it)
         cout << *it << ' ';
     
     cout << "\n---------------------------\n";
@@ -70,9 +67,9 @@ int main(int argc, const char * argv[]) {
     cout << "\n---------------------------\n";
     
     cout << "Unique Modules:\n";
-    vector<char> unique_modules;
+    vector<string> unique_modules;
     unique_modules = get_all_unique_modules(modules1);
-    for (vector<char>::iterator it = unique_modules.begin() ; it != unique_modules.end(); ++it)
+    for (vector<string>::iterator it = unique_modules.begin() ; it != unique_modules.end(); ++it)
         cout << *it << ' ';
     
     cout << "\n---------------------------\n";
@@ -80,40 +77,40 @@ int main(int argc, const char * argv[]) {
     cout << "The number of unique modules: " << unique_modules.size() << endl;
     
     // Get all the paths from node u to nove v
-    vector<char> nodes;
+    vector<string> nodes;
     nodes = transactions;
     nodes.insert(nodes.end(), unique_modules.begin(), unique_modules.end());
     cout << "All nodes.\n";
-    for (vector<char>::iterator it = nodes.begin() ; it != nodes.end(); ++it)
+    for (vector<string>::iterator it = nodes.begin() ; it != nodes.end(); ++it)
         cout << *it << ' ';
     
-    cout << "\nGet all the paths from node u to v: \n";
-    get_all_paths(defects[1], defects[0], modules1, nodes);
+    printf("\nGet all the paths from node %s to %s: \n", transaction.c_str(), defective.c_str());
+    get_all_paths(transaction, defective, modules1, nodes);
     
-    cout << "Explosion from the transaction: " << defects[1] << endl;
-    if (is_transaction(defects[1], transactions)) {
+    cout << "Explosion from the transaction: " << transaction << endl;
+    if (is_transaction(transaction, transactions)) {
         throw invalid_argument("Given transaction is only a module. Please provide the correct argument.");
     }
-    get_explosion(defects[1], modules1, nodes);
+    get_explosion(transaction, modules1, nodes);
     
     return 0;
 }
 
-unordered_map<char, vector<char> > get_module_tree(string file_name) {
+unordered_map<string, vector<string> > get_module_tree(string file_name) {
     // Hashmap, key<string> = name of the module, value <string[]> = its depended modules' name
     
-    unordered_map<char, vector<char> > modules;
-    vector<char> adjacency_list;
+    unordered_map<string, vector<string> > modules;
+    vector<string> adjacency_list;
     
     ifstream file;
     // left_module and right_module are separated by a space in the file. and right_module depends on left_module
-    char left_module, right_module;
+    string left_module, right_module;
     file.open(file_name);
     while (file) {
         file >> left_module >> right_module;
-//        cout << left_module << endl;
+//        cout << left_module << " " << right_module << endl;
 //        cout << right_module << endl;
-        if (left_module != '*')
+        if (left_module != "*")
             modules[left_module].push_back(right_module);
         else
             break;
@@ -123,36 +120,35 @@ unordered_map<char, vector<char> > get_module_tree(string file_name) {
 
 //Module after the * * is the name of the defective module.
 //Module after that defective module is the Transaction for the explosion.
- void get_transaction_for_explosion(string file_name, char* defects) {
+ void get_transaction_for_explosion(string file_name, string* defective_module, string* transaction) {
      ifstream file;
      // left_module and right_module are separated by a space in the file. and right_module depends on left_module
-     char defective_module, transaction;
-     char left_module = '\0', right_module;
+     string left_module, right_module;
      file.open(file_name);
      while (file) {
-         if (left_module == '*'){
-             file >> defective_module >> transaction;
-             defects[0] = defective_module;
-             defects[1] = transaction;
+         if (left_module == "*"){
+             file >> left_module >> right_module;
              break;
          } else
              file >> left_module >> right_module;
      }
+     *defective_module = left_module;
+     *transaction = right_module;
 
 }
 
-vector<char> get_all_transactions(unordered_map<char, vector<char> > module_tree) {
-    vector<char> transactions;
-    vector<char> keys;
+vector<string> get_all_transactions(unordered_map<string, vector<string> > module_tree) {
+    vector<string> transactions;
+    vector<string> keys;
     keys.reserve(module_tree.size());
-    vector<char> vals;
+    vector<string> vals;
     vals.reserve(module_tree.size());
     
     for(auto kv : module_tree) {
         keys.push_back(kv.first);
         vals.insert(vals.end(), kv.second.begin(), kv.second.end());
     }
-    for (vector<char>::iterator it = keys.begin() ; it != keys.end(); ++it){
+    for (vector<string>::iterator it = keys.begin() ; it != keys.end(); ++it){
         if(find(vals.begin(), vals.end(), *it) == vals.end())
             /* v contains x */
             transactions.push_back(*it);
@@ -160,20 +156,20 @@ vector<char> get_all_transactions(unordered_map<char, vector<char> > module_tree
     return transactions;
 }
 
-bool is_transaction(char module_name, vector<char> transactions) {
+bool is_transaction(string module_name, vector<string> transactions) {
     return find(transactions.begin(), transactions.end(), module_name) == transactions.end();
 }
 
-vector<char> get_all_unique_modules(unordered_map<char, vector<char> > module_tree) {
-    vector<char> unique_modules;
+vector<string> get_all_unique_modules(unordered_map<string, vector<string> > module_tree) {
+    vector<string> unique_modules;
     // Only Values in the map can be modules.
-    vector<char> vals;
+    vector<string> vals;
     vals.reserve(module_tree.size());
     
     for(auto kv : module_tree) {
         vals.insert(vals.end(), kv.second.begin(), kv.second.end());
     }
-    for (vector<char>::iterator it = vals.begin() ; it != vals.end(); ++it){
+    for (vector<string>::iterator it = vals.begin() ; it != vals.end(); ++it){
         if (!unique_modules.empty()) {
             if(find(unique_modules.begin(), unique_modules.end(), *it) == unique_modules.end())
                 unique_modules.push_back(*it);
@@ -184,12 +180,12 @@ vector<char> get_all_unique_modules(unordered_map<char, vector<char> > module_tr
     return unique_modules;
 }
 
-void get_all_paths(char transaction, char defective, unordered_map<char, vector<char> > module_tree, vector<char> nodes) {
+void get_all_paths(string transaction, string defective, unordered_map<string, vector<string> > module_tree, vector<string> nodes) {
     // Mark all the vertices as not visited
-    unordered_map<char, bool> visited;
+    unordered_map<string, bool> visited;
     
     // Create an array to store paths
-    char* path = new char[nodes.size()];
+    string* path = new string[nodes.size()];
     int path_index = 0; // Initialize path[] as empty
     
     // Initialize all vertices as not visited
@@ -199,7 +195,7 @@ void get_all_paths(char transaction, char defective, unordered_map<char, vector<
     print_all_paths_until(transaction, defective, visited, path, path_index, module_tree);
 }
 
-void print_all_paths_until(char u, char d, unordered_map<char, bool> visited, char* path, int &path_index, unordered_map<char, vector<char> > module_tree) {
+void print_all_paths_until(string u, string d, unordered_map<string, bool> visited, string* path, int &path_index, unordered_map<string, vector<string> > module_tree) {
     // Mark the current node and store it in path[]
     visited[u] = true;
     path[path_index] = u;
@@ -216,7 +212,7 @@ void print_all_paths_until(char u, char d, unordered_map<char, bool> visited, ch
     else // If current vertex is not destination
     {
         // Recur for all the vertices adjacent to current vertex
-        vector<char>::iterator i;
+        vector<string>::iterator i;
         for (i = module_tree[u].begin(); i != module_tree[u].end(); ++i)
             if (!visited[*i])
                 print_all_paths_until(*i, d, visited, path, path_index, module_tree);
@@ -227,19 +223,19 @@ void print_all_paths_until(char u, char d, unordered_map<char, bool> visited, ch
     visited[u] = false;
 }
 
-void get_explosion(char transaction, unordered_map<char, vector<char> > module_tree, vector<char> nodes) {
+void get_explosion(string transaction, unordered_map<string, vector<string> > module_tree, vector<string> nodes) {
     // Mark all the vertices as not visited
-    vector<char> visited;
-    stack<unordered_map<char, int> > stack_modules;
+    vector<string> visited;
+    stack<unordered_map<string, int> > stack_modules;
     
-    unordered_map<char, int> root;
+    unordered_map<string, int> root;
     root[transaction] = 0;
     stack_modules.push(root);
     
     while (!stack_modules.empty()) {
-        unordered_map<char, int> module = stack_modules.top();
+        unordered_map<string, int> module = stack_modules.top();
         stack_modules.pop();
-        char vertex = '\0';
+        string vertex;
         int space = 0;
         for (auto& x: module) {
             vertex = x.first;
@@ -255,14 +251,14 @@ void get_explosion(char transaction, unordered_map<char, vector<char> > module_t
             // if vertex not in visited
             visited.push_back(vertex);
             
-            unordered_map<char, vector<char> >::const_iterator has_key = module_tree.find(vertex);
+            unordered_map<string, vector<string> >::const_iterator has_key = module_tree.find(vertex);
             // If vertex is in module_tree
             if (has_key != module_tree.end()) {
                 for (auto it = module_tree[vertex].rbegin(); it != module_tree[vertex].rend(); ++it)
                 {
                     if (find(visited.begin(), visited.end(), *it) == visited.end()) {
                         // if vertex not in visited
-                        unordered_map<char, int> module;
+                        unordered_map<string, int> module;
                         module[*it] = space + 1;
                         stack_modules.push(module);
                     } else {
