@@ -110,8 +110,12 @@ unordered_map<string, vector<string> > get_module_tree(string file_name) {
         file >> left_module >> right_module;
 //        cout << left_module << " " << right_module << endl;
 //        cout << right_module << endl;
-        if (left_module != "*")
-            modules[left_module].push_back(right_module);
+        if (left_module != "*") {
+            if (left_module.size() <= 3 && right_module.size() <= 3) {
+                modules[left_module].push_back(right_module);
+            } else
+                throw invalid_argument("One of the module name has a length more than 3.");
+        }
         else
             break;
     }
